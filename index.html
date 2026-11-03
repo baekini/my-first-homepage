@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>중학 영단어 스터디</title>
+<style>
+:root{--navy:#243b64;--blue:#4776d0;--pale:#eef3ff;--ink:#243047;--muted:#718096;--line:#e4eaf3;--green:#21845b;--red:#c34c58}
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}
+header{background:linear-gradient(120deg,#243b64,#4776d0);color:white;padding:28px 20px 34px}
+.wrap{max-width:980px;margin:auto}header h1{margin:0 0 8px;font-size:28px}header p{margin:0;color:#e1eaff}
+main{max-width:980px;margin:-16px auto 40px;padding:0 16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;background:white;padding:10px;border-radius:14px;box-shadow:0 5px 20px #243b6412}
+button,select{font:inherit;border:0;border-radius:10px;padding:11px 15px;cursor:pointer}
+.tab{background:#f1f4fa;color:#53627a}.tab.active{background:var(--navy);color:white}
+.panel{display:none;background:white;border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:16px;box-shadow:0 8px 24px #243b6409}.panel.active{display:block}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
+h2{font-size:20px;margin:0 0 16px}.muted{color:var(--muted);font-size:14px}
+select{background:#f1f4fa;color:var(--ink);border:1px solid var(--line)}
+.primary{background:var(--blue);color:white}.secondary{background:var(--pale);color:var(--navy)}
+.word-card{min-height:230px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(145deg,#f5f8ff,#eaf0ff);border-radius:16px;margin:18px 0;padding:25px;cursor:pointer}
+.word{font-size:36px;font-weight:800;color:var(--navy);margin-bottom:12px}.meaning{font-size:22px;font-weight:700}.example{margin-top:16px;color:#66758d;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.stat{background:#f7f9fd;padding:16px;border-radius:13px}.stat strong{display:block;font-size:25px;color:var(--navy);margin-top:5px}
+.progress{height:9px;background:#e8edf6;border-radius:20px;overflow:hidden;margin-top:10px}.bar{height:100%;background:#5b87df;width:0;transition:.25s}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.option{background:#f3f6fb;border:1px solid var(--line);text-align:left}.option:hover{border-color:var(--blue)}
+.option.correct{background:#e8f7ef;border-color:#79c49d;color:var(--green)}.option.wrong{background:#fff0f1;border-color:#e3a0a7;color:var(--red)}
+input{padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit;min-width:0}
+.list{width:100%;border-collapse:collapse;margin-top:12px}.list th,.list td{text-align:left;padding:11px;border-bottom:1px solid var(--line)}.list th{color:var(--muted);font-size:13px}
+.feedback{min-height:24px;font-weight:700}.good{color:var(--green)}.bad{color:var(--red)}
+@media(max-width:560px){header h1{font-size:23px}.options{grid-template-columns:1fr}.panel{padding:16px}.word{font-size:31px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>📘 중학 영단어 스터디</h1><p>매일 조금씩, 꾸준하게! 단어를 익히고 퀴즈로 실력을 확인해 보세요.</p></div></header>
+<main>
+<nav class="tabs">
+<button class="tab active" data-tab="study">단어 학습</button><button class="tab" data-tab="quiz">단어 퀴즈</button><button class="tab" data-tab="list">단어장</button><button class="tab" data-tab="record">나의 학습 기록</button>
+</nav>
+<section id="study" class="panel active">
+<div class="row between"><div><h2>오늘의 단어</h2><div class="muted">카드를 누르면 뜻과 예문을 확인할 수 있어요.</div></div><select id="level"><option value="all">전체 단어</option><option value="1">중1 수준</option><option value="2">중2 수준</option><option value="3">중3 수준</option></select></div>
+<div class="word-card" id="flash" tabindex="0"><div class="word" id="fword">important</div><div class="meaning" id="fmeaning" hidden>중요한</div><div class="example" id="fexample" hidden>It is important to study every day.<br>매일 공부하는 것은 중요하다.</div><div class="muted" id="hint">카드를 눌러 뜻 확인하기</div></div>
+<div class="row between"><button class="secondary" id="prev">← 이전 단어</button><span class="muted" id="count">1 / 10</span><button class="primary" id="next">다음 단어 →</button></div>
+<div class="row" style="margin-top:16px"><button class="secondary" id="known">✓ 외웠어요</button><span class="muted" id="knownMsg">외운 단어를 표시해 보세요.</span></div>
+</section>
+<section id="quiz" class="panel">
+<div class="row between"><div><h2>실력 확인 퀴즈</h2><div class="muted">영어 단어에 알맞은 우리말 뜻을 고르세요.</div></div><button class="secondary" id="restart">퀴즈 다시 시작</button></div>
+<div class="row between"><strong id="qnum">문제 1 / 10</strong><span class="muted" id="score">점수 0점</span></div>
+<div class="progress"><div class="bar" id="qbar"></div></div>
+<h2 id="qword" style="font-size:30px;margin-top:25px">important</h2>
+<div class="options" id="options"></div><div class="feedback" id="feedback"></div>
+<button class="primary" id="nextq" disabled>다음 문제</button>
+</section>
+<section id="list" class="panel">
+<div class="row between"><div><h2>나의 단어장</h2><div class="muted">학년별 단어와 뜻, 예문을 확인하세요.</div></div><input id="search" placeholder="단어 또는 뜻 검색"></div>
+<div style="overflow-x:auto"><table class="list"><thead><tr><th>학년</th><th>영단어</th><th>뜻</th><th>예문</th></tr></thead><tbody id="wordRows"></tbody></table></div>
+</section>
+<section id="record" class="panel">
+<h2>나의 학습 기록</h2><div class="grid">
+<div class="stat"><span class="muted">전체 단어</span><strong id="totalStat">30개</strong></div>
+<div class="stat"><span class="muted">외운 단어</span><strong id="knownStat">0개</strong></div>
+<div class="stat"><span class="muted">퀴즈 최고 점수</span><strong id="bestStat">0점</strong></div>
+</div><h2 style="margin-top:24px">단어 암기 진행률</h2><div class="progress"><div class="bar" id="studybar"></div></div><p class="muted" id="percent">0% 완료</p><button class="secondary" id="resetRecord">학습 기록 초기화</button>
+</section>
+</main>
+<script>
+const words=[
+{w:"important",m:"중요한",e:"It is important to study every day.",k:1},{w:"library",m:"도서관",e:"I read books in the library.",k:1},{w:"favorite",m:"가장 좋아하는",e:"My favorite subject is science.",k:1},{w:"usually",m:"보통, 대개",e:"I usually walk to school.",k:1},{w:"healthy",m:"건강한",e:"Fruit is good for a healthy body.",k:1},{w:"culture",m:"문화",e:"We learned about Korean culture.",k:1},{w:"weather",m:"날씨",e:"The weather is sunny today.",k:1},{w:"practice",m:"연습하다",e:"You should practice speaking English.",k:1},{w:"different",m:"다른, 서로 다른",e:"We have different ideas.",k:1},{w:"invite",m:"초대하다",e:"I will invite my friends.",k:1},
+{w:"experience",m:"경험",e:"It was a great experience.",k:2},{w:"environment",m:"환경",e:"We should protect the environment.",k:2},{w:"increase",m:"증가하다",e:"The number of students may increase.",k:2},{w:"prepare",m:"준비하다",e:"I prepare for the test.",k:2},{w:"instead",m:"대신에",e:"Let's walk instead of taking a bus.",k:2},{w:"opinion",m:"의견",e:"What is your opinion?",k:2},{w:"possible",m:"가능한",e:"Is it possible to finish today?",k:2},{w:"discover",m:"발견하다",e:"They discovered a new island.",k:2},{w:"continue",m:"계속하다",e:"Please continue your work.",k:2},{w:"community",m:"지역 사회, 공동체",e:"We help our community.",k:2},
+{w:"achievement",m:"성취, 업적",e:"Winning the prize was a big achievement.",k:3},{w:"communicate",m:"의사소통하다",e:"We communicate by email.",k:3},{w:"concentrate",m:"집중하다",e:"I need a quiet place to concentrate.",k:3},{w:"decision",m:"결정",e:"It was a difficult decision.",k:3},{w:"opportunity",m:"기회",e:"This is a good opportunity to learn.",k:3},{w:"responsible",m:"책임이 있는",e:"She is responsible for the project.",k:3},{w:"suggest",m:"제안하다",e:"Can you suggest a good book?",k:3},{w:"valuable",m:"가치 있는",e:"Time is very valuable.",k:3},{w:"reduce",m:"줄이다, 감소시키다",e:"We should reduce plastic waste.",k:3},{w:"confident",m:"자신감 있는",e:"I feel confident about the test.",k:3}
+];
+let level="all",deck=words.slice(),idx=0,known=new Set(JSON.parse(localStorage.getItem("knownWords")||"[]")),best=+(localStorage.getItem("bestScore")||0);
+let qi=0,score=0,answered=false,quizSet=[];
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem("knownWords",JSON.stringify([...known]));localStorage.setItem("bestScore",best);updateStats()}
+function updateStats(){$("totalStat").textContent=words.length+"개";$("knownStat").textContent=known.size+"개";$("bestStat").textContent=best+"점";let p=Math.round(known.size/words.length*100);$("studybar").style.width=p+"%";$("percent").textContent=p+"% 완료"}
+function renderFlash(){let x=deck[idx];$("fword").textContent=x.w;$("fmeaning").textContent=x.m;$("fexample").textContent=x.e;$("fmeaning").hidden=true;$("fexample").hidden=true;$("hint").hidden=false;$("count").textContent=(idx+1)+" / "+deck.length;$("knownMsg").textContent=known.has(x.w)?"이미 외운 단어예요.":"외운 단어를 표시해 보세요."}
+$("flash").onclick=()=>{$("fmeaning").hidden=!$("fmeaning").hidden;$("fexample").hidden=$("fmeaning").hidden;$("hint").hidden=!$("fmeaning").hidden};
+$("prev").onclick=()=>{idx=(idx-1+deck.length)%deck.length;renderFlash()};$("next").onclick=()=>{idx=(idx+1)%deck.length;renderFlash()};
+$("known").onclick=()=>{known.add(deck[idx].w);save();renderFlash()};
+$("level").onchange=e=>{level=e.target.value;deck=words.filter(x=>level==="all"||x.k==level);idx=0;renderFlash()};
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab,.panel").forEach(x=>x.classList.remove("active"));b.classList.add("active");$(b.dataset.tab).classList.add("active");if(b.dataset.tab==="list")renderList();if(b.dataset.tab==="record")updateStats()});
+function renderList(){let q=$("search").value.toLowerCase();$("wordRows").innerHTML=words.filter(x=>(x.w+" "+x.m).toLowerCase().includes(q)).map(x=>`<tr><td>중${x.k}</td><td><b>${x.w}</b></td><td>${x.m}</td><td>${x.e}</td></tr>`).join("")}
+$("search").oninput=renderList;
+function startQuiz(){quizSet=[...words].sort(()=>Math.random()-.5).slice(0,10);qi=0;score=0;answered=false;renderQuiz()}
+function renderQuiz(){answered=false;let x=quizSet[qi];$("qnum").textContent=`문제 ${qi+1} / 10`;$("score").textContent=`점수 ${score}점`;$("qbar").style.width=(qi*10)+"%";$("qword").textContent=x.w;$("feedback").textContent="";$("feedback").className="feedback";$("nextq").disabled=true;$("nextq").textContent=qi===9?"결과 보기":"다음 문제";let opts=[x];while(opts.length<4){let a=words[Math.floor(Math.random()*words.length)];if(!opts.includes(a))opts.push(a)}opts.sort(()=>Math.random()-.5);$("options").innerHTML="";opts.forEach(o=>{let b=document.createElement("button");b.className="option";b.textContent=o.m;b.onclick=()=>answer(b,o,x);$("options").appendChild(b)})}
+function answer(btn,o,x){if(answered)return;answered=true;let ok=o===x;if(ok)score+=10;[...$("options").children].forEach(b=>{b.disabled=true;if(b.textContent===x.m)b.classList.add("correct")});if(!ok)btn.classList.add("wrong");$("feedback").textContent=ok?"정답이에요! 참 잘했어요 🎉":`아쉬워요. 정답은 '${x.m}'입니다.`;$("feedback").className="feedback "+(ok?"good":"bad");$("score").textContent=`점수 ${score}점`;$("nextq").disabled=false}
+$("nextq").onclick=()=>{if(qi<9){qi++;renderQuiz()}else{best=Math.max(best,score);save();$("qword").textContent=`퀴즈 완료! ${score}점`; $("options").innerHTML="";$("feedback").textContent=score>=80?"훌륭해요! 꾸준히 복습해 보세요.":"틀린 단어를 단어장에서 다시 확인해 보세요.";$("qbar").style.width="100%";$("nextq").textContent="다시 도전하기";$("nextq").onclick=startQuiz}};
+$("restart").onclick=startQuiz;
+$("resetRecord").onclick=()=>{if(confirm("외운 단어와 최고 점수를 초기화할까요?")){known.clear();best=0;save();renderFlash()}};
+renderFlash();renderList();updateStats();startQuiz();
+</script>
+</body></html>
